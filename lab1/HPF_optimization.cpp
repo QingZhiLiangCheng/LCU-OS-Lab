@@ -7,12 +7,13 @@
 
 #define getpch(type) (type*)malloc(sizeof(type))
 #define NULL 0
-
+#define TIME_LIMIT 5
 //TODO: 增加下列原则：进程等待的时间超过某一时限时增加其优先数
 struct pcb { /* 定义进程控制块PCB */
     char name[10];
     char state;
     int super;
+    int wait_time_;
     int ntime;
     int rtime;
     struct pcb *link;
@@ -78,12 +79,13 @@ int space() {
 
 void disp(PCB *pr) /*建立进程显示函数,用于显示当前进程*/
 {
-    printf("\n qname \t state \t super \t ndtime \t runtime \n");
+    printf("\n qname \t state \t super \t ndtime \t runtime \t wait_time_\n");
     printf("|%s\t", pr->name);
     printf("|%c\t", pr->state);
     printf("|%d\t", pr->super);
     printf("|%d\t", pr->ntime);
     printf("|%d\t", pr->rtime);
+    printf("|%d\t", pr->wait_time_);
     printf("\n");
 }
 
@@ -118,7 +120,18 @@ void running() /* 建立进程就绪函数(进程运行时间到,置就绪状态
     }
 }
 
-int main() /*主函数*/
+void UpdateWaitTime() {
+    PCB *pr = ready;
+    while (pr != nullptr) {
+        if (++pr->wait_time_ > TIME_LIMIT) {
+            pr->super++;
+            pr->wait_time_ = 0;
+        }
+        pr = pr->link;
+    }
+}
+
+int main()
 {
     int len, h = 0;
     char ch;
@@ -132,6 +145,7 @@ int main() /*主函数*/
         ready = p->link;
         p->link = NULL;
         p->state = 'R';
+        UpdateWaitTime();
         check();
         running();
         printf("\n 按任一键继续......");

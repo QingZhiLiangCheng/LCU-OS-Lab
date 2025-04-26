@@ -114,7 +114,7 @@ void running() /* 建立进程就绪函数(进程运行时间到,置就绪状态
     }
 }
 
-int main() /*主函数*/
+int main()
 {
     int len, h = 0;
     char ch;
@@ -128,6 +128,7 @@ int main() /*主函数*/
         ready = p->link;
         p->link = NULL;
         p->state = 'R';
+
         check();
         running();
         printf("\n 按任一键继续......");
